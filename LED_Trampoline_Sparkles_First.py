@@ -6,7 +6,6 @@ import digitalio
 
 pixel_pin = board.D10
 pixel_count = 90
-debounce_delay = 0.2  # Tweak this if you're having issues with the button changing modes
 
 pixels = neopixel.NeoPixel(pixel_pin, pixel_count, brightness=.4, auto_write=False)
 
@@ -99,23 +98,27 @@ chase_color_length = 3  # Time in seconds each color lasts in the color chase mo
 chase_last_color = time.monotonic()
 chase_next_color = chase_last_color + chase_color_length
 
+button_state = None
+
 mode = 0
+print("Mode:", mode)
+
 initial_time = time.monotonic()
 
 try:
     while True:
         now = time.monotonic()
-        if now - initial_time > debounce_delay:
-            print("Mode:", mode)
-            initial_time = time.monotonic()
-            if button_switch.value is False:
-                print("Mode Change")
-                led.value = True
-                pixels.fill((0, 0, 0))
-                mode += 1
-                print("Mode:,", mode)
-                if mode > 2:
-                    mode = 0
+        if not button_switch.value and button_state is None:
+            button_state = "pressed"
+        if button_switch.value and button_state == "pressed":
+            print("Mode Change")
+            led.value = True
+            pixels.fill((0, 0, 0))
+            mode += 1
+            button_state = None
+            print("Mode:,", mode)
+            if mode > 2:
+                mode = 0
         else:
             led.value = False
         if mode == 0 and vibration_switch.value is False:
@@ -125,7 +128,6 @@ try:
             print("Chase mode activate!")
             for i in range(0, pixel_count):
                 c = 0
-
                 if ((offset + i) & 7) < 4:
                     c = chase_color_cycle
                 pixels[i] = c
