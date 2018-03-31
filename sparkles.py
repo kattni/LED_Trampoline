@@ -67,8 +67,8 @@ def cycle_sequence(seq):
 
 
 sparkle_list = [
-    lambda: sparkle_code(GOLD),
     lambda: sparkle_code(PINK),
+    lambda: sparkle_code(GOLD),
     lambda: sparkle_code(AQUA),
     lambda: sparkle_code(JADE),
     lambda: sparkle_code(AMBER)
@@ -77,8 +77,7 @@ sparkle_list = [
 
 def sparkle(seq):
     sparkles = cycle_sequence(sparkle_list)
-    while True:
-        next(sparkles)()
+    next(sparkles)()
 
 
 while True:
