@@ -6,6 +6,7 @@ import board
 import neopixel
 import time
 import random
+import digitalio
 
 pixel_pin = board.D10
 pixel_count = 180  # Number of NeoPixels connected to GEMMA
@@ -15,8 +16,13 @@ delay_multiplier = 0  # Randomization multiplier, delay speed of the effect
 
 pixels = neopixel.NeoPixel(pixel_pin, pixel_count, brightness=.4, auto_write=False)
 
+big_switch = digitalio.DigitalInOut(board.D9)
+big_switch.direction = digitalio.Direction.INPUT
+big_switch.pull = digitalio.Pull.UP
 
-def sparkles(red_value, green_value, blue_value):
+
+def sparkle_code(color_values):
+    (red_value, green_value, blue_value) = color_values
     # sparkling
     # select a random pixel
     p = random.randint(0, (pixel_count - 2))
@@ -36,33 +42,46 @@ def sparkles(red_value, green_value, blue_value):
     pixels.show()
 
 
-def gold_sparkles():
-    sparkles(255, 222, 30)
+# Colors:
+RED = (255, 0, 0)
+YELLOW = (255, 150, 0)
+ORANGE = (255, 40, 0)
+GREEN = (0, 255, 0)
+TEAL = (0, 255, 120)
+CYAN = (0, 255, 255)
+BLUE = (0, 0, 255)
+PURPLE = (180, 0, 255)
+MAGENTA = (255, 0, 20)
+WHITE = (255, 255, 255)
+# Sparkle colors:
+GOLD = (255, 222, 30)
+PINK = (242, 90, 255)
+AQUA = (50, 255, 255)
+JADE = (0, 255, 40)
+AMBER = (255, 100, 0)
 
 
-def pink_sparkles():
-    sparkles(242, 90, 255)
+def cycle_sequence(seq):
+    while True:
+        yield from seq
 
 
-def blue_sparkles():
-    sparkles(50, 255, 255)
+sparkle_list = [
+    lambda: sparkle_code(GOLD),
+    lambda: sparkle_code(PINK),
+    lambda: sparkle_code(AQUA),
+    lambda: sparkle_code(JADE),
+    lambda: sparkle_code(AMBER)
+]
 
 
-def green_sparkles():
-    sparkles(0, 255, 40)
-
-
-def orange_sparkles():
-    sparkles(255, 100, 0)
-
-
-def sparkle_list():
-    gold_sparkles()
-    blue_sparkles()
-    green_sparkles()
-    pink_sparkles()
-    orange_sparkles()
+def sparkle(seq):
+    sparkles = cycle_sequence(sparkle_list)
+    while True:
+        next(sparkles)()
 
 
 while True:
-    sparkle_list()
+    if big_switch.value is False:
+        print("False")
+        sparkle(sparkle_list)

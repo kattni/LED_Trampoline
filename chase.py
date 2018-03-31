@@ -7,58 +7,68 @@ import time
 import random
 import digitalio
 
-numpix = 180  # Number of NeoPixels
+num_pixels = 180  # Number of NeoPixels
 pixpin = board.D10  # Pin where NeoPixels are connected
 
 mode = 0  # Current animation effect
-offset = 0  # Position of spinny eyes
 
-rgb_colors = ([255, 0, 0],  # red
-              [0, 255, 0],  # green
-              [0, 0, 255])  # blue
+# Colors:
+RED = (255, 0, 0)
+YELLOW = (255, 150, 0)
+ORANGE = (255, 40, 0)
+GREEN = (0, 255, 0)
+TEAL = (0, 255, 120)
+CYAN = (0, 255, 255)
+BLUE = (0, 0, 255)
+PURPLE = (180, 0, 255)
+MAGENTA = (255, 0, 20)
+WHITE = (255, 255, 255)
 
-rgb_idx = 0  # index counter - primary color we are on
-color = rgb_colors[rgb_idx]
+
+def cycle_sequence(seq):
+    while True:
+        yield from seq
+
 
 big_switch = digitalio.DigitalInOut(board.D9)
 big_switch.direction = digitalio.Direction.INPUT
 big_switch.pull = digitalio.Pull.UP
 
-pixels = neopixel.NeoPixel(pixpin, numpix, brightness=.3, auto_write=False)
+vibration_switch = digitalio.DigitalInOut(board.D7)
+vibration_switch.direction = digitalio.Direction.INPUT
+vibration_switch.pull = digitalio.Pull.UP
 
-prevtime = time.monotonic()
+pixels = neopixel.NeoPixel(pixpin, num_pixels, brightness=.3, auto_write=False)
 
 while True:
-    i = 0
-    t = 0
+    rgb_colors = (RED,
+                  GREEN,
+                  BLUE)
 
-    if big_switch.value is False:
-        for i in range(0, numpix):
-            c = 0
+    rgb_idx = 0
+    chase_color_cycle = rgb_colors[rgb_idx]
+    offset = 0
+    prevtime = time.monotonic()
 
-            # 4 pixels on...
-            if ((offset + i) & 7) < 4:
-                c = color
-            pixels[i] = c
-            pixels[(numpix - 1) - i] = c
+    while True:
+        if vibration_switch.value is False:
+            for i in range(0, num_pixels):
+                c = 0
 
-        pixels.show()
-        offset += 1
+                if ((offset + i) & 7) < 4:  # Every 4 pixels, light up 4 pixels
+                    c = chase_color_cycle  # Set the color to the current color from index
+                pixels[i] = c  # start at pixel 1, and go towards the middle
+                pixels[(num_pixels - 1) - i] = c  # start at the last pixel and go backwards toward middle
+            pixels.show()
+            offset += 1
 
-    t = time.monotonic()
+        t = time.monotonic()
 
-    if (t - prevtime) > 8:  # Every 8 seconds...
-        mode += 1  # Next mode
-        if mode > 1:  # End of modes?
-            mode = 0  # Start modes over
-
-        if rgb_idx > 2:  # reset R-->G-->B rotation
-            rgb_idx = 0
-
-        color = rgb_colors[rgb_idx]  # next color assignment
-        rgb_idx += 1
-
-        for i in range(0, numpix):
-            pixels[i] = (0, 0, 0)
-
-        prevtime = t
+        if (t - prevtime) > 3:  # Every 3 seconds...
+            if rgb_idx > 2:  # if the index goes out of range
+                rgb_idx = 0  # Reset it to 0
+            chase_color_cycle = rgb_colors[rgb_idx]  # gets the color list
+            rgb_idx += 1  # cycles to the next color
+            for i in range(0, num_pixels):
+                pixels[i] = (0, 0, 0)  # turns off the pixels between colors
+            prevtime = t  # resets time.monotonic()
