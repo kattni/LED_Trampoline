@@ -5,7 +5,7 @@ import random
 import digitalio
 
 pixel_pin = board.D10
-pixel_count = 180
+pixel_count = 90
 debounce_delay = 0.2  # Tweak this if you're having issues with the button changing modes
 
 pixels = neopixel.NeoPixel(pixel_pin, pixel_count, brightness=.4, auto_write=False)
@@ -116,20 +116,12 @@ try:
                 print("Mode:,", mode)
                 if mode > 2:
                     mode = 0
-        if mode == 0:
-            try:
-                if vibration_switch.value is False:
-                    print("Flash and fade mode activate!")
-                    fade = fade_control()
-                    pixels.fill(next(flash_color))
-                    pixels.show()
-                next(fade)
-            except StopIteration:
-                pass
-        if mode == 1 and vibration_switch.value is False:
+        else:
+            led.value = False
+        if mode == 0 and vibration_switch.value is False:
             print("Sparkle mode activate!")
             next(sparkles)()
-        if mode == 2 and vibration_switch.value is False:
+        if mode == 1 and vibration_switch.value is False:
             print("Chase mode activate!")
             for i in range(0, pixel_count):
                 c = 0
@@ -149,7 +141,15 @@ try:
                     pixels[i] = (0, 0, 0)
                 chase_last_color = now
                 chase_next_color = chase_last_color + chase_color_length
-        else:
-            led.value = False
+        if mode == 2:
+            try:
+                if vibration_switch.value is False:
+                    print("Flash and fade mode activate!")
+                    fade = fade_control()
+                    pixels.fill((next(flash_color)))
+                    pixels.show()
+                next(fade)
+            except StopIteration:
+                pass
 except MemoryError:
     pass
