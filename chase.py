@@ -40,35 +40,34 @@ vibration_switch.pull = digitalio.Pull.UP
 
 pixels = neopixel.NeoPixel(pixpin, num_pixels, brightness=.3, auto_write=False)
 
+rgb_colors = (RED,
+              GREEN,
+              BLUE)
+
+rgb_idx = 0
+chase_color_cycle = rgb_colors[rgb_idx]
+offset = 0
+prevtime = time.monotonic()
+
 while True:
-    rgb_colors = (RED,
-                  GREEN,
-                  BLUE)
+    if vibration_switch.value is False:
+        for i in range(0, num_pixels):
+            c = 0
 
-    rgb_idx = 0
-    chase_color_cycle = rgb_colors[rgb_idx]
-    offset = 0
-    prevtime = time.monotonic()
+            if ((offset + i) & 7) < 4:  # Every 4 pixels, light up 4 pixels
+                c = chase_color_cycle  # Set the color to the current color from index
+            pixels[i] = c  # start at pixel 1, and go towards the middle
+            pixels[(num_pixels - 1) - i] = c  # start at the last pixel and go backwards toward middle
+        pixels.show()
+        offset += 1
 
-    while True:
-        if vibration_switch.value is False:
-            for i in range(0, num_pixels):
-                c = 0
+    t = time.monotonic()
 
-                if ((offset + i) & 7) < 4:  # Every 4 pixels, light up 4 pixels
-                    c = chase_color_cycle  # Set the color to the current color from index
-                pixels[i] = c  # start at pixel 1, and go towards the middle
-                pixels[(num_pixels - 1) - i] = c  # start at the last pixel and go backwards toward middle
-            pixels.show()
-            offset += 1
-
-        t = time.monotonic()
-
-        if (t - prevtime) > 3:  # Every 3 seconds...
-            if rgb_idx > 2:  # if the index goes out of range
-                rgb_idx = 0  # Reset it to 0
-            chase_color_cycle = rgb_colors[rgb_idx]  # gets the color list
-            rgb_idx += 1  # cycles to the next color
-            for i in range(0, num_pixels):
-                pixels[i] = (0, 0, 0)  # turns off the pixels between colors
-            prevtime = t  # resets time.monotonic()
+    if (t - prevtime) > 3:  # Every 3 seconds...
+        if rgb_idx > 2:  # if the index goes out of range
+            rgb_idx = 0  # Reset it to 0
+        chase_color_cycle = rgb_colors[rgb_idx]  # gets the color list
+        rgb_idx += 1  # cycles to the next color
+        for i in range(0, num_pixels):
+            pixels[i] = (0, 0, 0)  # turns off the pixels between colors
+        prevtime = t  # resets time.monotonic()
