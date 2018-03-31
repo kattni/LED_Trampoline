@@ -6,8 +6,12 @@ import digitalio
 
 pixel_pin = board.D10
 pixel_count = 180
+debounce_delay = 0.2  # Tweak this if you're having issues with the button changing modes
 
 pixels = neopixel.NeoPixel(pixel_pin, pixel_count, brightness=.4, auto_write=False)
+
+led = digitalio.DigitalInOut(board.D13)
+led.direction = digitalio.Direction.OUTPUT
 
 button_switch = digitalio.DigitalInOut(board.D9)
 button_switch.direction = digitalio.Direction.INPUT
@@ -101,11 +105,12 @@ initial_time = time.monotonic()
 try:
     while True:
         now = time.monotonic()
-        if now - initial_time > 0.2:
+        if now - initial_time > debounce_delay:
             print("Mode:", mode)
             initial_time = time.monotonic()
             if button_switch.value is False:
                 print("Mode Change")
+                led.value = True
                 pixels.fill((0, 0, 0))
                 mode += 1
                 print("Mode:,", mode)
@@ -144,5 +149,7 @@ try:
                     pixels[i] = (0, 0, 0)
                 chase_last_color = now
                 chase_next_color = chase_last_color + chase_color_length
+        else:
+            led.value = False
 except MemoryError:
     pass
