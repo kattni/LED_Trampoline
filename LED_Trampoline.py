@@ -9,9 +9,9 @@ pixel_count = 180
 
 pixels = neopixel.NeoPixel(pixel_pin, pixel_count, brightness=.4, auto_write=False)
 
-big_switch = digitalio.DigitalInOut(board.D9)
-big_switch.direction = digitalio.Direction.INPUT
-big_switch.pull = digitalio.Pull.UP
+button_switch = digitalio.DigitalInOut(board.D9)
+button_switch.direction = digitalio.Direction.INPUT
+button_switch.pull = digitalio.Pull.UP
 
 vibration_switch = digitalio.DigitalInOut(board.D7)
 vibration_switch.direction = digitalio.Direction.INPUT
@@ -104,7 +104,8 @@ try:
         if now - initial_time > 0.2:
             print("Mode:", mode)
             initial_time = time.monotonic()
-            if big_switch.value is False:
+            if button_switch.value is False:
+                print("Mode Change")
                 pixels.fill((0, 0, 0))
                 mode += 1
                 print("Mode:,", mode)
