@@ -61,19 +61,16 @@ def sparkle_code(color_values):
     p = random.randint(0, (pixel_count - 2))
     pixels[p] = (red_value, green_value, blue_value)
     pixels.show()
-    time.sleep(sparkle_delay_seconds * random.randint(0, sparkle_delay_multiplier))
     pixels[p] = (int(red_value / 2), int(green_value / 2), int(blue_value / 2))
     pixels.show()
-    pixels[p + 1] = (int(red_value / 5), int(green_value / 5), int(blue_value / 5))
+    pixels[p + 1] = (int(red_value / 10), int(green_value / 10), int(blue_value / 10))
     pixels.show()
 
-
-sparkle_delay_seconds = 0
-sparkle_delay_multiplier = 0
 
 fade = fade_control()
 
 sparkle_list = [
+    lambda: sparkle_code(MAGENTA),
     lambda: sparkle_code(PINK),
     lambda: sparkle_code(GOLD),
     lambda: sparkle_code(AQUA),
@@ -107,55 +104,58 @@ print("Mode:", mode)
 
 initial_time = time.monotonic()
 
-try:
-    while True:
-        now = time.monotonic()
-        if not button_switch.value and button_state is None:
-            button_state = "pressed"
-        if button_switch.value and button_state == "pressed":
-            print("Mode Change")
-            led.value = True
-            pixels.fill((0, 0, 0))
-            mode += 1
-            button_state = None
-            if mode > 2:
-                mode = 0
-            print("Mode:,", mode)
-        else:
-            led.value = False
-        if mode == 0:
-            try:
-                if not vibration_switch.value:
-                    print("Flash and fade mode activate!")
-                    fade = fade_control()
-                    pixels.fill(next(flash_color))
-                    pixels.show()
-                next(fade)
-            except StopIteration:
-                pass
-        if mode == 1 and not vibration_switch.value:
-            print("Sparkle mode activate!")
-            next(sparkles)()
-        if mode == 2 and not vibration_switch.value:
-            print("Chase mode activate!")
-            for i in range(0, pixel_count):
-                c = 0
-                if ((offset + i) & 7) < 4:
-                    c = chase_color_cycle
-                pixels[i] = c
-                pixels[(pixel_count - 1) - i] = c
-            pixels.show()
-            offset += 1
-            if now >= chase_next_color:
-                if chase_color_index > 5:
-                    chase_color_index = 0
-                chase_color_cycle = chase_color_list[chase_color_index]
-                chase_color_index += 1
+while True:
+    try:
+        while True:
+            now = time.monotonic()
+            if not button_switch.value and button_state is None:
+                button_state = "pressed"
+            if button_switch.value and button_state == "pressed":
+                print("Mode Change")
+                led.value = True
+                pixels.fill((0, 0, 0))
+                mode += 1
+                button_state = None
+                if mode > 2:
+                    mode = 0
+                print("Mode:,", mode)
+            else:
+                led.value = False
+            if mode == 0:
+                try:
+                    if not vibration_switch.value:
+                        print("Flash and fade mode activate!")
+                        fade = fade_control()
+                        pixels.fill(next(flash_color))
+                        pixels.show()
+                    next(fade)
+                except StopIteration:
+                    pass
+            if mode == 1 and not vibration_switch.value:
+                pixels.brightness = 1
+                print("Sparkle mode activate!")
+                next(sparkles)()
+            if mode == 2 and not vibration_switch.value:
+                print("Chase mode activate!")
+                pixels.brightness = 1
                 for i in range(0, pixel_count):
-                    pixels[i] = (0, 0, 0)
-                chase_last_color = now
-                chase_next_color = chase_last_color + chase_color_length
-        else:
-            led.value = False
-except MemoryError:
-    pass
+                    c = 0
+                    if ((offset + i) & 7) < 4:
+                        c = chase_color_cycle
+                    pixels[i] = c
+                    pixels[(pixel_count - 1) - i] = c
+                pixels.show()
+                offset += 1
+                if now >= chase_next_color:
+                    if chase_color_index > 5:
+                        chase_color_index = 0
+                    chase_color_cycle = chase_color_list[chase_color_index]
+                    chase_color_index += 1
+                    for i in range(0, pixel_count):
+                        pixels[i] = (0, 0, 0)
+                    chase_last_color = now
+                    chase_next_color = chase_last_color + chase_color_length
+            else:
+                led.value = False
+    except MemoryError:
+        pass
