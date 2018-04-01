@@ -4,21 +4,24 @@ import neopixel
 import random
 import digitalio
 
-pixel_pin = board.D10
-pixel_count = 180
+pixel_pin = board.D10  # The pin the NeoPixels are connected to
+button_switch_pin = board.D9  # Pin button is attached to
+vibration_switch_pin = board.D7  # Pin vibration switch is attached to.
+pixel_count = 90  # Number of pixels in your strip
+chase_color_length = 3  # Time in seconds each color lasts in the color chase mode
 
 pixels = neopixel.NeoPixel(pixel_pin, pixel_count, brightness=.4, auto_write=False)
 
-led = digitalio.DigitalInOut(board.D13)
-led.direction = digitalio.Direction.OUTPUT
-
-button_switch = digitalio.DigitalInOut(board.D9)
+button_switch = digitalio.DigitalInOut(button_switch_pin)
 button_switch.direction = digitalio.Direction.INPUT
 button_switch.pull = digitalio.Pull.UP
 
-vibration_switch = digitalio.DigitalInOut(board.D7)
+vibration_switch = digitalio.DigitalInOut(vibration_switch_pin)
 vibration_switch.direction = digitalio.Direction.INPUT
 vibration_switch.pull = digitalio.Pull.UP
+
+led = digitalio.DigitalInOut(board.D13)
+led.direction = digitalio.Direction.OUTPUT
 
 # Colors:
 RED = (255, 0, 0)
@@ -94,7 +97,6 @@ chase_color_index = 0
 chase_color_cycle = chase_color_list[chase_color_index]
 offset = 0
 
-chase_color_length = 3  # Time in seconds each color lasts in the color chase mode
 chase_last_color = time.monotonic()
 chase_next_color = chase_last_color + chase_color_length
 
