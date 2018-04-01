@@ -117,12 +117,12 @@ try:
             pixels.fill((0, 0, 0))
             mode += 1
             button_state = None
-            print("Mode:,", mode)
             if mode > 2:
                 mode = 0
+            print("Mode:,", mode)
         else:
             led.value = False
-        if mode == 0 and vibration_switch.value is False:
+        if mode == 0 and not vibration_switch.value:
             print("Chase mode activate!")
             for i in range(0, pixel_count):
                 c = 0
@@ -141,12 +141,12 @@ try:
                     pixels[i] = (0, 0, 0)
                 chase_last_color = now
                 chase_next_color = chase_last_color + chase_color_length
-        if mode == 1 and vibration_switch.value is False:
+        if mode == 1 and not vibration_switch.value:
             print("Sparkle mode activate!")
             next(sparkles)()
         if mode == 2:
             try:
-                if vibration_switch.value is False:
+                if not vibration_switch.value:
                     print("Flash and fade mode activate!")
                     fade = fade_control()
                     pixels.fill((next(flash_color)))
