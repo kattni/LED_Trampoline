@@ -1,7 +1,7 @@
 import time
+import random
 import board
 import neopixel
-import random
 import digitalio
 
 pixel_pin = board.D10  # The pin the NeoPixels are connected to
@@ -69,6 +69,9 @@ def sparkle_code(color_values):
 
 fade = fade_control()
 
+flash_color = cycle_sequence([RED, YELLOW, ORANGE, GREEN, TEAL, CYAN,
+                              BLUE, PURPLE, MAGENTA, WHITE])
+
 sparkle_list = [
     lambda: sparkle_code(MAGENTA),
     lambda: sparkle_code(PINK),
@@ -79,9 +82,6 @@ sparkle_list = [
 ]
 
 sparkles = cycle_sequence(sparkle_list)
-
-flash_color = cycle_sequence([RED, YELLOW, ORANGE, GREEN, TEAL, CYAN,
-                              BLUE, PURPLE, MAGENTA, WHITE])
 
 chase_color_list = (RED,
                     ORANGE,
@@ -132,8 +132,8 @@ while True:
                 except StopIteration:
                     pass
             if mode == 1 and not vibration_switch.value:
-                pixels.brightness = 1
                 print("Sparkle mode activate!")
+                pixels.brightness = 1
                 next(sparkles)()
             if mode == 2 and not vibration_switch.value:
                 print("Chase mode activate!")
